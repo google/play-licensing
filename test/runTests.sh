@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 
-cd ../sample
-ant install
+cd ../lvl_sample
+ant debug install
 cd ../test
-ant install
-adb shell am instrument -w com.example.android.market.licensing.test/android.test.InstrumentationTestRunner
+ant debug install
+adb shell am instrument -w com.example.google.play.licensing.test/android.test.InstrumentationTestRunner
