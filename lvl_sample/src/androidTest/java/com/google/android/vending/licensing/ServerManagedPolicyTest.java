@@ -22,33 +22,47 @@ import com.google.android.vending.licensing.Policy;
 import com.google.android.vending.licensing.ResponseData;
 import com.google.android.vending.licensing.ServerManagedPolicy;
 
+import android.content.Context;
 import android.provider.Settings;
-import android.test.ActivityInstrumentationTestCase2;
-import android.test.AndroidTestCase;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test suite for StrictPolicy.
  */
-public class ServerManagedPolicyTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class ServerManagedPolicyTest {
 
-    ServerManagedPolicy p;
+    private ServerManagedPolicy p;
 
-    public void setUp() {
+    @Before
+    public void initFixture() {
         final byte[] SALT = new byte[] {
             104, -12, 112, 82, -85, -10, -11, 61, 15, 54, 44, -66, -117, -89, -64, 110, -53, 123, 33
         };
 
+        Context ctx = InstrumentationRegistry.getTargetContext();
         String deviceId = Settings.Secure.getString(
-                getContext().getApplicationContext().getContentResolver(),
+                ctx.getApplicationContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID);
-        p = new ServerManagedPolicy(getContext().getApplicationContext(),
-                new AESObfuscator(SALT, getContext().getPackageName(), deviceId));
+        p = new ServerManagedPolicy(ctx.getApplicationContext(),
+                new AESObfuscator(SALT, ctx.getPackageName(), deviceId));
     }
 
     /**
      * Verify that extra data is parsed correctly on a LICENSED resopnse..
      */
-    public void testExtraDataParsed() {
+    @Test
+    public void extraDataParsed() {
 
         String sampleResponse = "0|1579380448|com.example.android.market.licensing|1|" +
                 "ADf8I4ajjgc1P5ZI1S1DN/YIPIUNPECLrg==|1279578835423:VT=11&GT=22&GR=33";
@@ -62,7 +76,8 @@ public class ServerManagedPolicyTest extends AndroidTestCase {
     /**
      * Verify that retry counts are cleared after getting a NOT_LICENSED response.
      */
-    public void testRetryCountsCleared() {
+    @Test
+    public void retryCountsCleared() {
         String sampleResponse = "0|1579380448|com.example.android.market.licensing|1|" +
                 "ADf8I4ajjgc1P5ZI1S1DN/YIPIUNPECLrg==|1279578835423:VT=1&GT=2&GR=3";
         p.processServerResponse(Policy.LICENSED,
@@ -79,7 +94,8 @@ public class ServerManagedPolicyTest extends AndroidTestCase {
         assertEquals(0l, p.getMaxRetries());
     }
 
-    public void testNoFailureOnEncodedExtras() {
+    @Test
+    public void noFailureOnEncodedExtras() {
         String sampleResponse = "0|1579380448|com.example.android.market.licensing|1|" +
                 "ADf8I4ajjgc1P5ZI1S1DN/YIPIUNPECLrg==|1279578835423:VT=1&test=hello%20world%20%26" +
                 "%20friends&GT=2&GR=3";

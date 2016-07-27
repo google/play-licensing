@@ -20,37 +20,47 @@ import com.google.android.vending.licensing.AESObfuscator;
 import com.google.android.vending.licensing.Obfuscator;
 import com.google.android.vending.licensing.ValidationException;
 
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
 import java.util.Arrays;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class AESObfuscatorTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class AESObfuscatorTest {
     private static final String TAG = "AESObfuscatorTest";
-    private static final byte[] SALT = new byte[] {
-        104, -12, 112, 82, -85, -10, -11, 61, 15, 54, 44, -66, -117, -89, -64, 110, -53, 123, 33
+    private static final byte[] SALT = new byte[]{
+            104, -12, 112, 82, -85, -10, -11, 61, 15, 54, 44, -66, -117, -89, -64, 110, -53, 123, 33
     };
     private static final String PACKAGE = "package";
     private static final String DEVICE = "device";
 
     private Obfuscator mObfuscator;
 
-    @Override
-    protected void setUp() throws Exception{
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         mObfuscator = new AESObfuscator(SALT, PACKAGE, DEVICE);
     }
 
-    public void testObfuscateUnobfuscate() throws Exception {
-        testInvertible(null);
-        testInvertible("");
-        testInvertible(
-            "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*-=/\\|~`,.;:"
-            + "()[]{}<>\u00F6");
+    @Test
+    public void obfuscateUnobfuscate() throws Exception {
+        isInvertible(null);
+        isInvertible("");
+        isInvertible(
+                "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*-=/\\|~`,.;:"
+                        + "()[]{}<>\u00F6");
     }
 
-    public void testUnobfuscate_invalid() throws Exception {
+    @Test
+    public void unobfuscateInvalid() throws Exception {
         try {
             mObfuscator.unobfuscate("invalid", "testKey");
             fail("Should have thrown ValidationException");
@@ -58,9 +68,10 @@ public class AESObfuscatorTest extends TestCase {
         }
     }
 
-    public void testUnobfuscate_differentSalt() throws Exception {
+    @Test
+    public void unobfuscateDifferentSalt() throws Exception {
         String obfuscated = mObfuscator.obfuscate("test", "testKey");
-        Obfuscator differentSalt = new AESObfuscator(new byte[] { 1 }, PACKAGE, DEVICE);
+        Obfuscator differentSalt = new AESObfuscator(new byte[]{1}, PACKAGE, DEVICE);
         try {
             differentSalt.unobfuscate(obfuscated, "testKey");
             fail("Should have thrown ValidationException");
@@ -68,7 +79,8 @@ public class AESObfuscatorTest extends TestCase {
         }
     }
 
-    public void testUnobfuscate_avoidBadPaddingException() throws Exception {
+    @Test
+    public void unobfuscateAvoidBadPaddingException() throws Exception {
         // Length should be equal to the cipher block size, to make sure that all padding lengths
         // are accounted for.
         for (int length = 0; length < 255; length++) {
@@ -77,7 +89,7 @@ public class AESObfuscatorTest extends TestCase {
             String input = String.valueOf(data);
             Log.d(TAG, "Input: (" + length + ")" + input);
             String obfuscated = mObfuscator.obfuscate(input, "testKey");
-            Obfuscator differentSalt = new AESObfuscator(new byte[] { 1 }, PACKAGE, DEVICE);
+            Obfuscator differentSalt = new AESObfuscator(new byte[]{1}, PACKAGE, DEVICE);
             try {
                 differentSalt.unobfuscate(obfuscated, "testKey");
                 fail("Should have thrown ValidationException");
@@ -86,7 +98,8 @@ public class AESObfuscatorTest extends TestCase {
         }
     }
 
-    public void testUnobfuscate_differentDevice() throws Exception {
+    @Test
+    public void unobfuscateDifferentDevice() throws Exception {
         String obfuscated = mObfuscator.obfuscate("test", "testKey");
         Obfuscator differentDevice = new AESObfuscator(SALT, PACKAGE, "device2");
         try {
@@ -96,7 +109,8 @@ public class AESObfuscatorTest extends TestCase {
         }
     }
 
-    public void testUnobfuscate_differentPackage() throws Exception {
+    @Test
+    public void unobfuscateDifferentPackage() throws Exception {
         String obfuscated = mObfuscator.obfuscate("test", "testKey");
         Obfuscator differentPackage = new AESObfuscator(SALT, "package2", DEVICE);
         try {
@@ -106,7 +120,8 @@ public class AESObfuscatorTest extends TestCase {
         }
     }
 
-    public void testUnobfuscate_differentKey() throws Exception {
+    @Test
+    public void unobfuscateDifferentKey() throws Exception {
         String obfuscated = mObfuscator.obfuscate("test", "testKey");
         Obfuscator differentPackage = new AESObfuscator(SALT, "package2", DEVICE);
         try {
@@ -116,7 +131,8 @@ public class AESObfuscatorTest extends TestCase {
         }
     }
 
-    public void testObfuscate_same() throws Exception {
+    @Test
+    public void obfuscateSame() throws Exception {
         String obfuscated = mObfuscator.obfuscate("test", "testKey");
         assertEquals(obfuscated, mObfuscator.obfuscate("test", "testKey"));
 
@@ -125,7 +141,9 @@ public class AESObfuscatorTest extends TestCase {
         assertEquals("test", same.unobfuscate(obfuscated, "testKey"));
     }
 
-    private void testInvertible(String original) throws Exception {
-        assertEquals(original, mObfuscator.unobfuscate(mObfuscator.obfuscate(original, original+"Key"), original+"Key"));
+    private void isInvertible(String original) throws Exception {
+        assertEquals(original,
+                mObfuscator.unobfuscate(mObfuscator.obfuscate(original, original + "Key"),
+                        original + "Key"));
     }
 }

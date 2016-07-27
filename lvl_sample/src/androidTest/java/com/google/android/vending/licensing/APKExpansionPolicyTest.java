@@ -16,41 +16,52 @@
 
 package com.google.android.vending.licensing;
 
-
 import com.google.android.vending.licensing.AESObfuscator;
 import com.google.android.vending.licensing.APKExpansionPolicy;
 import com.google.android.vending.licensing.Policy;
 import com.google.android.vending.licensing.ResponseData;
 
+import android.content.Context;
 import android.provider.Settings;
-import android.test.ActivityInstrumentationTestCase2;
-import android.test.AndroidTestCase;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test suite for StrictPolicy.
  */
-public class APKExpansionPolicyTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class APKExpansionPolicyTest {
 
-    APKExpansionPolicy p;
+    private APKExpansionPolicy p;
 
-    public void setUp() {
+    @Before
+    public void initFixture() {
         final byte[] SALT = new byte[] {
             104, -12, 112, 82, -85, -10, -11, 61, 15, 54, 44, -66, -117, -89, -64, 110, -53, 123, 33
         };
 
+        Context ctx = InstrumentationRegistry.getTargetContext();
         String deviceId = Settings.Secure.getString(
-                getContext().getContentResolver(),
+                ctx.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
-        p = new APKExpansionPolicy(getContext(),
-                new AESObfuscator(SALT, getContext().getPackageName(), deviceId));
+        p = new APKExpansionPolicy(ctx,
+                new AESObfuscator(SALT, ctx.getPackageName(), deviceId));
     }
 
     /**
      * Verify that extra data is parsed correctly on a LICENSED resopnse..
      */
-    public void testExtraDataParsed() {
+    @Test
+    public void extraDataParsed() {
         // This is a sample server response from Google Play for an application that has both
         // a main and a patch APK Expansion file.  The response includes the URLs used to
         // download the files from Google Play, the names of the files to save, and the
@@ -64,14 +75,14 @@ public class APKExpansionPolicyTest extends AndroidTestCase {
                 "&FILE_NAME2=patch.3.com.example.android.market.licensing.obb&FILE_SIZE2=204233";
         p.processServerResponse(Policy.LICENSED,
                 ResponseData.parse(sampleResponse));
-        assertEquals(11l, p.getValidityTimestamp());
-        assertEquals(22l, p.getRetryUntil());
-        assertEquals(33l, p.getMaxRetries());
+        assertEquals(11L, p.getValidityTimestamp());
+        assertEquals(22L, p.getRetryUntil());
+        assertEquals(33L, p.getMaxRetries());
         assertEquals(2, p.getExpansionURLCount());
         assertEquals("main.3.com.example.android.market.licensing.obb",p.getExpansionFileName(0));
-        assertEquals(687801613l,p.getExpansionFileSize(0));
+        assertEquals(687801613L,p.getExpansionFileSize(0));
         assertEquals("http://jmt17.google.com/vending_kila/download/AppDownload?packageName=com.example.android.market.licensing&versionCode=3&ft=o&token=AOTCm0RwlzqFYylBNSCTLJApGH0cYtm9g8mGMdUhKLSLJW4v9VM8GLj4GVlGU5oyW6y3FsXrJiQqMunTGw9B",
-                    p.getExpansionURL(0));
+                p.getExpansionURL(0));
         assertEquals("patch.3.com.example.android.market.licensing.obb",p.getExpansionFileName(1));
         assertEquals(204233,p.getExpansionFileSize(1));
         assertEquals("http://jmt17.google.com/vending_kila/download/AppDownload?packageName=com.example.android.market.licensing&versionCode=3&ft=o&token=AOTCm0RwlzqFYylBNSCTLJApGH0cYtm9g8mGMdUhKLSLJW4v9VM8GLsdSDjefsdfEKdVaseEsfaMeifTek9B",
@@ -81,32 +92,34 @@ public class APKExpansionPolicyTest extends AndroidTestCase {
     /**
      * Verify that retry counts are cleared after getting a NOT_LICENSED response.
      */
-    public void testRetryCountsCleared() {
+    @Test
+    public void retryCountsCleared() {
         String sampleResponse = "0|1579380448|com.example.android.market.licensing|1|" +
                 "ADf8I4ajjgc1P5ZI1S1DN/YIPIUNPECLrg==|1279578835423:VT=1&GT=2&GR=3";
         p.processServerResponse(Policy.LICENSED,
                 ResponseData.parse(sampleResponse));
         // Sanity test
-        assertTrue(0l != p.getValidityTimestamp());
-        assertTrue(0l != p.getRetryUntil());
-        assertTrue(0l != p.getMaxRetries());
+        assertTrue(0L != p.getValidityTimestamp());
+        assertTrue(0L != p.getRetryUntil());
+        assertTrue(0L != p.getMaxRetries());
 
         // Actual test
         p.processServerResponse(Policy.NOT_LICENSED, null);
-        assertEquals(0l, p.getValidityTimestamp());
-        assertEquals(0l, p.getRetryUntil());
-        assertEquals(0l, p.getMaxRetries());
+        assertEquals(0L, p.getValidityTimestamp());
+        assertEquals(0L, p.getRetryUntil());
+        assertEquals(0L, p.getMaxRetries());
     }
 
-    public void testNoFailureOnEncodedExtras() {
+    @Test
+    public void noFailureOnEncodedExtras() {
         String sampleResponse = "0|1579380448|com.example.android.market.licensing|1|" +
                 "ADf8I4ajjgc1P5ZI1S1DN/YIPIUNPECLrg==|1279578835423:VT=1&test=hello%20world%20%26" +
                 "%20friends&GT=2&GR=3";
         p.processServerResponse(Policy.LICENSED,
                 ResponseData.parse(sampleResponse));
-        assertEquals(1l, p.getValidityTimestamp());
-        assertEquals(2l, p.getRetryUntil());
-        assertEquals(3l, p.getMaxRetries());
+        assertEquals(1L, p.getValidityTimestamp());
+        assertEquals(2L, p.getRetryUntil());
+        assertEquals(3L, p.getMaxRetries());
     }
 
 }

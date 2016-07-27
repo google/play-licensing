@@ -20,34 +20,46 @@ import com.google.android.vending.licensing.AESObfuscator;
 import com.google.android.vending.licensing.Obfuscator;
 import com.google.android.vending.licensing.PreferenceObfuscator;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.provider.Settings;
-import android.test.AndroidTestCase;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import static org.junit.Assert.assertEquals;
+
 
 /**
  * Test suite for PreferenceObfuscator.
  */
-public class ObfuscatedPreferencesTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class ObfuscatedPreferencesTest {
 
     private static final String filename =
             "com.android.vending.licnese.test.ObfuscatedPreferencePopulatedTest";
     private SharedPreferences sp;
     private PreferenceObfuscator op;
 
-    @Override
-    public void setUp() {
+    @Before
+    public void initFixture() {
         final byte[] SALT = new byte[] {
             104, -12, 112, 82, -85, -10, -11, 61, 15, 54, 44, -66, -117, -89, -64, 110, -53, 123, 33
         };
 
         // Prepare PreferenceObfuscator instance
-        sp = getContext().getSharedPreferences(filename, Context.MODE_PRIVATE);
+        Context ctx = InstrumentationRegistry.getTargetContext();
+        sp = ctx.getSharedPreferences(filename, Context.MODE_PRIVATE);
         String deviceId = Settings.Secure.getString(
-                getContext().getApplicationContext().getContentResolver(),
+                ctx.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
-        Obfuscator o = new AESObfuscator(SALT, getContext().getPackageName(), deviceId);
+        Obfuscator o = new AESObfuscator(SALT, ctx.getPackageName(), deviceId);
         op = new PreferenceObfuscator(sp, o);
 
         // Populate with test data
@@ -55,6 +67,7 @@ public class ObfuscatedPreferencesTest extends AndroidTestCase {
         op.commit();
     }
 
+    @After
     public void cleanup() {
         // Manually clear out any saved preferences
         SharedPreferences.Editor spe = sp.edit();
@@ -62,19 +75,23 @@ public class ObfuscatedPreferencesTest extends AndroidTestCase {
         spe.commit();
     }
 
-    public void testGetString() {
+    @Test
+    public void getString() {
         assertEquals("Hello world", op.getString("testString", "fail"));
     }
 
-    public void testGetDefaultString() {
+    @Test
+    public void getDefaultString() {
         assertEquals("Android rocks", op.getString("noExist", "Android rocks"));
     }
 
-    public void testGetDefaultNullString() {
+    @Test
+    public void getDefaultNullString() {
         assertEquals(null, op.getString("noExist", null));
     }
 
-    public void testCorruptDataRetunsDefaultString() {
+    @Test
+    public void corruptDataRetunsDefaultString() {
         // Insert non-obfuscated string
         SharedPreferences.Editor spe = sp.edit();
         spe.putString("corruptData", "foo");

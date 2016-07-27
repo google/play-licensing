@@ -16,20 +16,28 @@
 
 package com.google.android.vending.licensing;
 
+import android.support.test.runner.AndroidJUnit4;
+
 import com.google.android.vending.licensing.Policy;
 import com.google.android.vending.licensing.StrictPolicy;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test suite for StrictPolicy.
  */
-public class StrictPolicyTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class StrictPolicyTest {
 
     /**
      * Verify that initial response is to deny access.
      */
-    public void testInitialResponse() {
+    @Test
+    public void initialResponse() {
         StrictPolicy p = new StrictPolicy();
         boolean result = p.allowAccess();
         assertFalse(result);
@@ -39,7 +47,8 @@ public class StrictPolicyTest extends TestCase {
      * Verify that after receiving a LICENSED response, the policy grants
      * access.
      */
-    public void testLicensedResonse()  {
+    @Test
+    public void licensedResponse()  {
         StrictPolicy p = new StrictPolicy();
         p.processServerResponse(Policy.LICENSED, null);
         boolean result = p.allowAccess();
@@ -50,7 +59,8 @@ public class StrictPolicyTest extends TestCase {
      * Verify that after receiving a NOT_LICENSED response, the policy denies
      * access.
      */
-    public void testNotLicensedResponse() {
+    @Test
+    public void notLicensedResponse() {
         StrictPolicy p = new StrictPolicy();
         p.processServerResponse(Policy.NOT_LICENSED, null);
         boolean result = p.allowAccess();
@@ -61,7 +71,8 @@ public class StrictPolicyTest extends TestCase {
      * Verify that after receiving a RETRY response, the policy denies
      * access.
      */
-    public void testRetryResponse() {
+    @Test
+    public void retryResponse() {
         StrictPolicy p = new StrictPolicy();
         p.processServerResponse(Policy.RETRY, null);
         boolean result = p.allowAccess();
