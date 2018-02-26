@@ -16,6 +16,6 @@
 
 package com.android.vending.licensing;
 
-oneway interface ILicenseResultListener {
-  void verifyLicense(int responseCode, String signedData, String signature);
+interface ILicenseResultListener {
+  oneway void verifyLicense(int responseCode, String signedData, String signature);
 }
