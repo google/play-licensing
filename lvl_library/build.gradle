@@ -4,6 +4,7 @@ android {
     compileSdkVersion 23
 
     defaultConfig {
+        // Devices >= 3 have a version of Android Market that supports licensing.
         minSdkVersion 4
         targetSdkVersion 23
     }
