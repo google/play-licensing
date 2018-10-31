@@ -90,7 +90,7 @@ public class MainActivity extends Activity {
         // Construct the LicenseChecker with a policy.
         mChecker = new LicenseChecker(
             this, new ServerManagedPolicy(this,
-                new AESObfuscator(SALT, getPackageName(), deviceId)),
+            new AESObfuscator(SALT, getPackageName(), deviceId)),
             BASE64_PUBLIC_KEY);
         doCheck();
     }
@@ -100,15 +100,14 @@ public class MainActivity extends Activity {
         return new AlertDialog.Builder(this)
             .setTitle(R.string.unlicensed_dialog_title)
             .setMessage(bRetry ? R.string.unlicensed_dialog_retry_body : R.string.unlicensed_dialog_body)
-            .setPositiveButton(bRetry ? R.string.retry_button : R.string.buy_button, new DialogInterface.OnClickListener() {
+            .setPositiveButton(bRetry ? R.string.retry_button : R.string.restore_access_button,
+                new DialogInterface.OnClickListener() {
                 boolean mRetry = bRetry;
                 public void onClick(DialogInterface dialog, int which) {
                     if ( mRetry ) {
                         doCheck();
                     } else {
-                        Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(
-                                "http://market.android.com/details?id=" + getPackageName()));
-                            startActivity(marketIntent);
+                        mChecker.followLastLicensingUrl(MainActivity.this);
                     }
                 }
             })
@@ -167,7 +166,8 @@ public class MainActivity extends Activity {
             // the app should inform the user of their unlicensed ways
             // and then either shut down the app or limit the user to a
             // restricted set of features.
-            // In this example, we show a dialog that takes the user to Market.
+            // In this example, we show a dialog that takes the user to a deep
+            // link returned by the license checker.
             // If the reason for the lack of license is that the service is
             // unavailable or there is another problem, we display a
             // retry button on the dialog and a different message.
