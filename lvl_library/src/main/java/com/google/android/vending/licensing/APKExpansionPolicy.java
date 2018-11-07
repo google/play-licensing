@@ -143,6 +143,8 @@ public class APKExpansionPolicy implements Policy {
         Map<String, String> extras = decodeExtras(rawData);
         if (response == Policy.LICENSED) {
             mLastResponse = response;
+            // Reset the licensing URL since it is only applicable for NOT_LICENSED responses.
+            setLicensingUrl(null);
             setValidityTimestamp(Long.toString(System.currentTimeMillis() + MILLIS_PER_MINUTE));
             Set<String> keys = extras.keySet();
             for (String key : keys) {
@@ -164,10 +166,11 @@ public class APKExpansionPolicy implements Policy {
                 }
             }
         } else if (response == Policy.NOT_LICENSED) {
-            // Clear out stale policy data
+            // Clear out stale retry params
             setValidityTimestamp(DEFAULT_VALIDITY_TIMESTAMP);
             setRetryUntil(DEFAULT_RETRY_UNTIL);
             setMaxRetries(DEFAULT_MAX_RETRIES);
+            // Update the licensing URL
             setLicensingUrl(extras.get("LU"));
         }
 
