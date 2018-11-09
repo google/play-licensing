@@ -32,6 +32,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -104,14 +106,41 @@ public class APKExpansionPolicyTest {
         assertTrue(0L != p.getMaxRetries());
 
         // Actual test
-        p.processServerResponse(Policy.NOT_LICENSED, null);
+        p.processServerResponse(Policy.NOT_LICENSED, ResponseData.parse(sampleResponse));
         assertEquals(0L, p.getValidityTimestamp());
         assertEquals(0L, p.getRetryUntil());
         assertEquals(0L, p.getMaxRetries());
     }
 
+    /**
+     * Verify that LU extra is parsed on NOT_LICENSED responses.
+     */
     @Test
-    public void noFailureOnEncodedExtras() {
+    public void licensingUrlExtraParsed() {
+        String sampleResponse = "0|1579380448|com.example.android.market.licensing|1|" +
+            "ADf8I4ajjgc1P5ZI1S1DN/YIPIUNPECLrg==|1279578835423:" +
+            "LU=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.example.android.market.licensing";
+        // Sanity test
+        p.processServerResponse(Policy.LICENSED, ResponseData.parse(sampleResponse));
+        assertNull(p.getLicensingUrl());
+
+        // Actual test
+        p.processServerResponse(Policy.NOT_LICENSED, ResponseData.parse(sampleResponse));
+        assertEquals("https://play.google.com/store/apps/details?id=com.example.android.market.licensing",
+            p.getLicensingUrl());
+    }
+
+    /**
+     * Verify that the policy can process null server responses.
+     */
+    @Test
+    public void noFailureOnNullResponseData() {
+        p.processServerResponse(Policy.RETRY, null);
+        assertFalse(p.allowAccess());
+    }
+
+    @Test
+    public void noFailureOnAdditionalEncodedExtras() {
         String sampleResponse = "0|1579380448|com.example.android.market.licensing|1|" +
                 "ADf8I4ajjgc1P5ZI1S1DN/YIPIUNPECLrg==|1279578835423:VT=1&test=hello%20world%20%26" +
                 "%20friends&GT=2&GR=3";

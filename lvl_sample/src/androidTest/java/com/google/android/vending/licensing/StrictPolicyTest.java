@@ -24,6 +24,7 @@ import com.google.android.vending.licensing.StrictPolicy;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -57,14 +58,21 @@ public class StrictPolicyTest {
 
     /**
      * Verify that after receiving a NOT_LICENSED response, the policy denies
-     * access.
+     * access and extracts the licensing URL from the response.
      */
     @Test
     public void notLicensedResponse() {
         StrictPolicy p = new StrictPolicy();
-        p.processServerResponse(Policy.NOT_LICENSED, null);
+
+        String sampleResponse = "0|1579380448|com.example.android.market.licensing|1|" +
+            "ADf8I4ajjgc1P5ZI1S1DN/YIPIUNPECLrg==|1279578835423:" +
+            "LU=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.example.android.market.licensing";
+        p.processServerResponse(Policy.NOT_LICENSED, ResponseData.parse(sampleResponse));
         boolean result = p.allowAccess();
         assertFalse(result);
+        assertEquals(
+            "https://play.google.com/store/apps/details?id=com.example.android.market.licensing",
+            p.getLicensingUrl());
     }
 
     /**
