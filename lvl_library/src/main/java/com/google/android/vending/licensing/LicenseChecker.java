@@ -207,6 +207,7 @@ public class LicenseChecker implements ServiceConnection {
             licensingUrl = "https://play.google.com/store/apps/details?id=" + context.getPackageName();
         }
         Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(licensingUrl));
+        marketIntent.setPackage("com.android.vending");
         context.startActivity(marketIntent);
     }
 
