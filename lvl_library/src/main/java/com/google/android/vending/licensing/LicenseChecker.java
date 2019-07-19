@@ -16,6 +16,7 @@
 
 package com.google.android.vending.licensing;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -208,6 +209,9 @@ public class LicenseChecker implements ServiceConnection {
         }
         Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(licensingUrl));
         marketIntent.setPackage("com.android.vending");
+        if (!(context instanceof Activity)) {
+            marketIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         context.startActivity(marketIntent);
     }
 
