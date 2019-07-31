@@ -18,6 +18,6 @@ package com.android.vending.licensing;
 
 import com.android.vending.licensing.ILicenseResultListener;
 
-oneway interface ILicensingService {
-  void checkLicense(long nonce, String packageName, in ILicenseResultListener listener);
+interface ILicensingService {
+  oneway void checkLicense(long nonce, String packageName, in ILicenseResultListener listener);
 }
