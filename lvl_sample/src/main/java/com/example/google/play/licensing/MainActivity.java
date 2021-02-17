@@ -22,12 +22,11 @@ import com.google.android.vending.licensing.LicenseCheckerCallback;
 import com.google.android.vending.licensing.Policy;
 import com.google.android.vending.licensing.ServerManagedPolicy;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings.Secure;
@@ -37,8 +36,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 /**
- * Welcome to the world of Google Play licensing. We're so glad to have you
- * on board!
+ * Welcome to the world of Google Play licensing. We're so glad to have you on board!
  * <p>
  * The first thing you need to do is get your hands on your public key.
  * Update the BASE64_PUBLIC_KEY constant below with the encoded public key
@@ -50,6 +48,7 @@ import android.widget.TextView;
  * licensing documentation.</a>
  */
 public class MainActivity extends Activity {
+
     private static final String BASE64_PUBLIC_KEY = "REPLACE THIS WITH YOUR PUBLIC KEY";
 
     // Generate your own 20 random bytes, and put them here.
@@ -63,6 +62,7 @@ public class MainActivity extends Activity {
 
     private LicenseCheckerCallback mLicenseCheckerCallback;
     private LicenseChecker mChecker;
+
     // A handler on the UI thread.
     private Handler mHandler;
 
@@ -83,15 +83,18 @@ public class MainActivity extends Activity {
         mHandler = new Handler();
 
         // Try to use more data here. ANDROID_ID is a single point of attack.
+        @SuppressLint("HardwareIds")
         String deviceId = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
 
         // Library calls this when it's done.
         mLicenseCheckerCallback = new MyLicenseCheckerCallback();
+
         // Construct the LicenseChecker with a policy.
         mChecker = new LicenseChecker(
             this, new ServerManagedPolicy(this,
             new AESObfuscator(SALT, getPackageName(), deviceId)),
             BASE64_PUBLIC_KEY);
+
         doCheck();
     }
 
@@ -102,7 +105,7 @@ public class MainActivity extends Activity {
             .setMessage(bRetry ? R.string.unlicensed_dialog_retry_body : R.string.unlicensed_dialog_body)
             .setPositiveButton(bRetry ? R.string.retry_button : R.string.restore_access_button,
                 new DialogInterface.OnClickListener() {
-                boolean mRetry = bRetry;
+                final boolean mRetry = bRetry;
                 public void onClick(DialogInterface dialog, int which) {
                     if ( mRetry ) {
                         doCheck();
@@ -192,5 +195,4 @@ public class MainActivity extends Activity {
         super.onDestroy();
         mChecker.onDestroy();
     }
-
 }
