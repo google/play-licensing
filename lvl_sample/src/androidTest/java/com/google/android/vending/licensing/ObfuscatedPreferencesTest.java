@@ -16,16 +16,13 @@
 
 package com.google.android.vending.licensing;
 
-import com.google.android.vending.licensing.AESObfuscator;
-import com.google.android.vending.licensing.Obfuscator;
-import com.google.android.vending.licensing.PreferenceObfuscator;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.provider.Settings;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
@@ -33,7 +30,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertEquals;
-
 
 /**
  * Test suite for PreferenceObfuscator.

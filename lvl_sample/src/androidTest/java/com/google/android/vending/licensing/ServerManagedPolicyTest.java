@@ -16,17 +16,12 @@
 
 package com.google.android.vending.licensing;
 
-
-import com.google.android.vending.licensing.AESObfuscator;
-import com.google.android.vending.licensing.Policy;
-import com.google.android.vending.licensing.ResponseData;
-import com.google.android.vending.licensing.ServerManagedPolicy;
-
 import android.content.Context;
 import android.provider.Settings;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

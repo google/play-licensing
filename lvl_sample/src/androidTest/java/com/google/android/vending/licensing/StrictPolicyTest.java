@@ -16,10 +16,7 @@
 
 package com.google.android.vending.licensing;
 
-import android.support.test.runner.AndroidJUnit4;
-
-import com.google.android.vending.licensing.Policy;
-import com.google.android.vending.licensing.StrictPolicy;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -16,6 +16,7 @@
 
 package com.google.android.vending.licensing;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -71,18 +72,18 @@ public class LicenseChecker implements ServiceConnection {
 
     private ILicensingService mService;
 
-    private PublicKey mPublicKey;
+    private final PublicKey mPublicKey;
     private final Context mContext;
     private final Policy mPolicy;
     /**
      * A handler for running tasks on a background thread. We don't want license processing to block
      * the UI thread.
      */
-    private Handler mHandler;
+    private final Handler mHandler;
     private final String mPackageName;
     private final String mVersionCode;
-    private final Set<LicenseValidator> mChecksInProgress = new HashSet<LicenseValidator>();
-    private final Queue<LicenseValidator> mPendingChecks = new LinkedList<LicenseValidator>();
+    private final Set<LicenseValidator> mChecksInProgress = new HashSet<>();
+    private final Queue<LicenseValidator> mPendingChecks = new LinkedList<>();
 
     /**
      * @param context a Context
@@ -111,7 +112,6 @@ public class LicenseChecker implements ServiceConnection {
         try {
             byte[] decodedKey = Base64.decode(encodedPublicKey);
             KeyFactory keyFactory = KeyFactory.getInstance(KEY_FACTORY_ALGORITHM);
-
             return keyFactory.generatePublic(new X509EncodedKeySpec(decodedKey));
         } catch (NoSuchAlgorithmException e) {
             // This won't happen in an Android-compatible environment.
@@ -135,7 +135,7 @@ public class LicenseChecker implements ServiceConnection {
      * source string: "com.android.vending.licensing.ILicensingService"
      * <p>
      * 
-     * @param callback
+     * @param callback listener
      */
     public synchronized void checkAccess(LicenseCheckerCallback callback) {
         // If we have a valid recent LICENSED response, we can skip asking
@@ -240,7 +240,7 @@ public class LicenseChecker implements ServiceConnection {
 
     private class ResultListener extends ILicenseResultListener.Stub {
         private final LicenseValidator mValidator;
-        private Runnable mOnTimeout;
+        private final Runnable mOnTimeout;
 
         public ResultListener(LicenseValidator validator) {
             mValidator = validator;
@@ -292,6 +292,7 @@ public class LicenseChecker implements ServiceConnection {
                         }
 
                         if (logResponse) {
+                            @SuppressLint("HardwareIds")
                             String android_id = Secure.getString(mContext.getContentResolver(),
                                     Secure.ANDROID_ID);
                             Date date = new Date();
@@ -378,7 +379,7 @@ public class LicenseChecker implements ServiceConnection {
     /**
      * Get version code for the application package name.
      *
-     * @param context
+     * @param context the current context
      * @param packageName application package name
      * @return the version code or empty string if package not found
      */
