@@ -1,17 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-
+    namespace 'com.example.google.play.licensing'
+    compileSdk 34
     defaultConfig {
         applicationId "com.example.google.play.licensing"
-        minSdkVersion 8
-        targetSdkVersion 23
-
+        minSdk 8
+        targetSdk 34
         testApplicationId "com.example.google.play.licensing.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
-
     buildTypes {
         release {
             minifyEnabled false
